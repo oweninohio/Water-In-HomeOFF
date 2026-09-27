@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>WATER IN HOME - วิกฤตน้ำท่วมบ้าน (2D Survival)</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐟</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Press+Start+2P&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/src/style.css" />
+</head>
+<body>
+  <!-- 2D Canvas for Game World & Character -->
+  <canvas id="game-canvas"></canvas>
+
+  <!-- UI Layer Container -->
+  <div class="ui-layer">
+
+    <!-- 1. MAIN MENU SCREEN -->
+    <div id="main-menu-screen">
+      <div class="menu-water-bg"></div>
+      <div class="glass-card menu-container">
+        <div class="game-logo-badge">🌊 2D Survival &bull; Scavenger Hunt</div>
+        <h1 class="game-title">WATER IN HOME</h1>
+        <p class="game-subtitle">เอาชีวิตรอดจากน้ำท่วมบ้าน &bull; กู้ภัยสิ่งของสำคัญก่อนจมน้ำมิด!</p>
+
+        <!-- Animated Fish-head Character Mascot Preview -->
+        <div class="mascot-preview" title="Fishman - ตัวละครหัวปลาตัวคนสุดเท่">
+          <canvas id="mascot-canvas" width="120" height="120"></canvas>
+          <div class="mascot-water-ring"></div>
+        </div>
+
+        <div class="menu-buttons">
+          <button id="btn-play-game" class="btn-menu btn-primary">
+            <span>▶</span> <strong>PLAY GAME</strong> <small style="opacity: 0.8; font-weight: normal;">(เริ่มเกม)</small>
+          </button>
+          <button id="btn-open-stages" class="btn-menu btn-stage-select">
+            <span>🗺️</span> <strong>STAGE SELECT</strong> <small style="opacity: 0.8;">(เลือกด่าน 1 - 5)</small>
+          </button>
+          <button id="btn-open-guide" class="btn-menu">
+            <span>📖</span> <span>HOW TO PLAY</span> <small style="opacity: 0.8;">(วิธีเล่น)</small>
+          </button>
+          <button id="btn-open-settings" class="btn-menu">
+            <span>⚙️</span> <span>SETTINGS</span> <small style="opacity: 0.8;">(การตั้งค่า)</small>
+          </button>
+          <button id="btn-open-credits" class="btn-menu">
+            <span>👥</span> <span>CREDITS</span> <small style="opacity: 0.8;">(เครดิต)</small>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. HOW TO PLAY MODAL -->
+    <div id="how-to-play-modal" class="modal-overlay">
+      <div class="glass-card modal-card">
+        <div class="modal-header">
+          <h2 class="modal-title"><span>📖</span> HOW TO PLAY <span style="font-size: 16px; color: var(--text-muted);">(วิธีเล่น)</span></h2>
+          <button class="modal-close-btn" data-close="how-to-play-modal">&times;</button>
+        </div>
+        
+        <div class="guide-content">
+          <!-- Objective -->
+          <div class="guide-section highlight-box">
+            <h3 style="color: #38bdf8; display: flex; align-items: center; gap: 8px;">
+              <span>🎯</span> OBJECTIVE
+            </h3>
+            <p style="font-size: 15px; font-weight: 600; color: #f8fafc; margin-top: 4px;">
+              “Collect important items and escape before the water gets too high.”
+            </p>
+            <p style="font-size: 13px; color: #94a3b8; margin-top: 4px;">
+              เดินสำรวจบ้านหลายห้อง เก็บสิ่งของจำเป็นให้ได้มากที่สุด แล้ววิ่งขึ้นบันไดสู่ดาดฟ้า/ทางหนี ก่อนน้ำจะท่วมมิดบ้านหรือเวลาหมด!
+            </p>
+          </div>
+
+          <!-- Controls Section with Visual Keys -->
+          <div class="guide-section">
+            <h3 style="color: #facc15; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+              <span>🎮</span> CONTROLS (การควบคุม)
+            </h3>
+            <div class="keys-grid">
+              <div class="key-card">
+                <div class="key-icons">
+                  <kbd>W</kbd> <span>/</span> <kbd>↑</kbd>
+                </div>
+                <div class="key-desc">เดินขึ้น (Walk Up)</div>
+              </div>
+              <div class="key-card">
+                <div class="key-icons">
+                  <kbd>S</kbd> <span>/</span> <kbd>↓</kbd>
+                </div>
+                <div class="key-desc">เดินลง (Walk Down)</div>
+              </div>
+              <div class="key-card">
+                <div class="key-icons">
+                  <kbd>A</kbd> <span>/</span> <kbd>←</kbd>
+                </div>
+                <div class="key-desc">เดินซ้าย (Walk Left)</div>
+              </div>
+              <div class="key-card">
+                <div class="key-icons">
+                  <kbd>D</kbd> <span>/</span> <kbd>→</kbd>
+                </div>
+                <div class="key-desc">เดินขวา (Walk Right)</div>
+              </div>
+              <div class="key-card highlight-key">
+                <div class="key-icons">
+                  <kbd class="kbd-action">E</kbd>
+                </div>
+                <div class="key-desc"><strong>วิ่งเร็ว (Sprint Boost)</strong> / โต้ตอบ</div>
+              </div>
+              <div class="key-card">
+                <div class="key-icons">
+                  <kbd>TAB</kbd> <span>/</span> <kbd>C</kbd>
+                </div>
+                <div class="key-desc">รายการเช็คลิสต์</div>
+              </div>
+              <div class="key-card">
+                <div class="key-icons">
+                  <kbd>ESC</kbd>
+                </div>
+                <div class="key-desc">เปิดเมนู Pause</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Water Flood Warnings -->
+          <div class="guide-section">
+            <h3 style="color: #ef4444; margin-bottom: 8px; display: flex; align-items: center; gap: 8px;">
+              <span>🌊</span> WATER FLOOD SYSTEM (ระบบน้ำท่วม)
+            </h3>
+            <ul class="water-stages-list">
+              <li><span class="badge badge-normal">0–30%</span> <strong>ปกติ:</strong> น้ำเริ่มซึมเข้าบ้าน เดินคล่องตัว</li>
+              <li><span class="badge badge-warning">30–60%</span> <strong>เริ่มอันตราย:</strong> น้ำท่วมระดับเอว ตัวละครเริ่มเคลื่อนที่ช้าลง</li>
+              <li><span class="badge badge-submerged">60–80%</span> <strong>บ้านเริ่มจมน้ำ:</strong> ชั้น 1 จมน้ำ ตัวละครต้องว่ายน้ำ เสียงไซเรนเตือน</li>
+              <li><span class="badge badge-danger">80–100%</span> <strong>อันตรายมาก:</strong> น้ำขึ้นสู่ชั้น 2 ต้องรีบขึ้นจุดหนีฉุกเฉินด่วน!</li>
+            </ul>
+          </div>
+        </div>
+
+        <div style="margin-top: 20px; text-align: right;">
+          <button class="btn-menu btn-primary" data-close="how-to-play-modal" style="display: inline-flex; width: auto; padding: 10px 24px;">
+            เข้าใจแล้ว &bull; กลับสู่เมนู
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. SETTINGS MODAL -->
+    <div id="settings-modal" class="modal-overlay">
+      <div class="glass-card modal-card">
+        <div class="modal-header">
+          <h2 class="modal-title"><span>⚙️</span> SETTINGS <span style="font-size: 16px; color: var(--text-muted);">(การตั้งค่า)</span></h2>
+          <button class="modal-close-btn" data-close="settings-modal">&times;</button>
+        </div>
+
+        <div class="settings-group">
+          <!-- AUDIO SECTION -->
+          <div class="setting-category-title">🔊 AUDIO (ระบบเสียง)</div>
+          
+          <div class="setting-item">
+            <div class="setting-label-row">
+              <span>🎵 Music Volume</span>
+              <span id="txt-music-val" class="slider-val">70%</span>
+            </div>
+            <div class="slider-container">
+              <input id="slider-music" type="range" class="range-slider" min="0" max="100" value="70">
+            </div>
+          </div>
+
+          <div class="setting-item">
+            <div class="setting-label-row">
+              <span>💥 SFX Volume</span>
+              <span id="txt-sfx-val" class="slider-val">80%</span>
+            </div>
+            <div class="slider-container">
+              <input id="slider-sfx" type="range" class="range-slider" min="0" max="100" value="80">
+            </div>
+          </div>
+
+          <!-- GAME SECTION -->
+          <div class="setting-category-title">🎮 GAME (ระบบเกม)</div>
+
+          <div class="setting-item">
+            <div class="setting-label-row">
+              <span>⏱️ Show Timer</span>
+              <label class="toggle-switch">
+                <input id="toggle-timer" type="checkbox" checked>
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+            <span class="setting-desc">แสดงเวลานับถอยหลังบนหน้าจอ</span>
+          </div>
+
+          <div class="setting-item">
+            <div class="setting-label-row">
+              <span>🌊 Show Water Level</span>
+              <label class="toggle-switch">
+                <input id="toggle-water-level" type="checkbox" checked>
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+            <span class="setting-desc">แสดงระดับน้ำท่วมและเปอร์เซ็นต์อันตราย</span>
+          </div>
+
+          <!-- CONTROLS SECTION -->
+          <div class="setting-category-title">🕹️ CONTROLS (การควบคุม)</div>
+          <div class="setting-controls-preview">
+            <div class="ctrl-chip"><strong>W / A / S / D</strong> เคลื่อนที่</div>
+            <div class="ctrl-chip"><strong>E</strong> Interact / เก็บของ</div>
+            <div class="ctrl-chip"><strong>ESC</strong> Pause</div>
+          </div>
+
+          <!-- GRAPHICS SECTION -->
+          <div class="setting-category-title">✨ GRAPHICS (คุณภาพกราฟิก)</div>
+          <div class="setting-item">
+            <div class="seg-control" id="control-graphics">
+              <button class="seg-btn" data-quality="low">Low</button>
+              <button class="seg-btn" data-quality="medium">Medium</button>
+              <button class="seg-btn active" data-quality="high">High</button>
+            </div>
+            <span class="setting-desc">High: แสงสะท้อนผิวน้ำ คลื่นน้ำสมจริง ละอองน้ำ และฟองอากาศเต็มรูปแบบ</span>
+          </div>
+        </div>
+
+        <div style="margin-top: 20px; display: flex; justify-content: flex-end;">
+          <button class="btn-menu" data-close="settings-modal" style="width: auto; padding: 10px 24px;">
+            <span>◀</span> <strong>BACK</strong> (ย้อนกลับ)
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. CREDITS MODAL -->
+    <div id="credits-modal" class="modal-overlay">
+      <div class="glass-card modal-card" style="max-width: 460px; text-align: center;">
+        <div class="modal-header" style="justify-content: center;">
+          <h2 class="modal-title">👥 CREDITS (เครดิต)</h2>
+        </div>
+        <div style="padding: 10px 0; display: flex; flex-direction: column; gap: 14px; text-align: left; font-size: 14px;">
+          <div style="text-align: center; margin-bottom: 8px;">
+            <div style="font-size: 26px; font-weight: 800; color: #38bdf8;">WATER IN HOME</div>
+            <div style="color: #94a3b8; font-size: 13px;">2D Survival & Exploration Prototype</div>
+          </div>
+          <div class="credits-item">
+            <strong>🐟 Game Concept & Design:</strong>
+            <p>มนุษย์หัวปลา (Fishman) ผจญภัยวิกฤตน้ำท่วมบ้าน</p>
+          </div>
+          <div class="credits-item">
+            <strong>🎨 2D Art & Procedural Canvas Engine:</strong>
+            <p>HTML5 Canvas Dynamic Top-Down Multi-Room Simulation</p>
+          </div>
+          <div class="credits-item">
+            <strong>🎶 Dynamic Aquatic Audio Synthesizer:</strong>
+            <p>Pure Web Audio API (Chiptune + Tension Synth Beats)</p>
+          </div>
+        </div>
+        <div style="margin-top: 20px;">
+          <button class="btn-menu btn-primary" data-close="credits-modal" style="width: 100%;">
+            <strong>BACK</strong> (ย้อนกลับ)
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4.5. STAGE SELECT MODAL -->
+    <div id="stage-select-modal" class="modal-overlay">
+      <div class="glass-card modal-card" style="max-width: 620px;">
+        <div class="modal-header">
+          <h2 class="modal-title"><span>🗺️</span> STAGE SELECT <span style="font-size: 16px; color: var(--text-muted);">(เลือกด่าน 1 - 5)</span></h2>
+          <button class="modal-close-btn" data-close="stage-select-modal">&times;</button>
+        </div>
+
+        <div class="stage-list-grid" id="stage-list-grid">
+          <!-- Populated dynamically by StageSystem -->
+        </div>
+
+        <div style="margin-top: 18px; display: flex; justify-content: flex-end;">
+          <button class="btn-menu" data-close="stage-select-modal" style="width: auto; padding: 10px 24px;">
+            <span>◀</span> <strong>BACK</strong> (ย้อนกลับ)
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. IN-GAME HUD -->
+    <div id="game-hud">
+      <!-- Top HUD Header -->
+      <div class="hud-top-bar">
+        
+        <!-- Left 1: Stage Info Badge -->
+        <div id="hud-stage-container" class="glass-card hud-stage-card">
+          <div class="hud-stage-badge" id="hud-stage-badge">STAGE 1</div>
+          <span class="hud-stage-name" id="hud-stage-name">น้ำท่วมเริ่มต้น</span>
+        </div>
+
+        <!-- Left 2: Water Level Bar -->
+        <div id="hud-water-container" class="glass-card hud-water-card">
+          <div class="hud-card-label">
+            <span>🌊 WATER LEVEL</span>
+            <span id="hud-water-pct" class="water-pct-badge">0%</span>
+          </div>
+          <div class="water-bar-track">
+            <div id="hud-water-bar" class="water-bar-fill"></div>
+          </div>
+          <div id="hud-water-status" class="water-status-label">ปกติ (Normal)</div>
+        </div>
+
+        <!-- Center: Time Countdown -->
+        <div id="hud-timer-container" class="glass-card hud-timer-card">
+          <span class="timer-icon">⏱️</span>
+          <div class="timer-display">
+            <span class="timer-title">TIME LEFT</span>
+            <span id="hud-timer-text" class="timer-digits">03:00</span>
+          </div>
+        </div>
+
+        <!-- Right: Items Counter & Checklist Drawer -->
+        <div class="glass-card hud-items-card" id="hud-items-card">
+          <div class="hud-items-header">
+            <span class="items-icon">🎒</span>
+            <div>
+              <span class="items-title">ITEMS</span>
+              <span id="hud-items-count" class="items-count-val">0 / 10</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pause Button in HUD -->
+        <button id="btn-hud-pause" class="glass-card hud-pause-btn" title="Pause Game (ESC)">
+          ⏸️ ESC
+        </button>
+      </div>
+
+      <!-- Current Room Banner & Floor Indicator -->
+      <div class="hud-room-banner" id="hud-room-banner">
+        <span class="room-floor-badge" id="hud-floor-indicator">ชั้น 1</span>
+        <span class="room-name-text" id="hud-room-name">📍 ห้องนั่งเล่น (Living Room)</span>
+      </div>
+
+      <!-- ACTIVE QUEST HUD CARD -->
+      <div class="glass-card hud-quest-card" id="hud-quest-card">
+        <div class="quest-header">
+          <div class="quest-badge-row">
+            <span class="quest-tag" id="quest-tag">📜 QUEST 1</span>
+            <span class="quest-progress-badge" id="quest-progress-badge">0 / 3</span>
+          </div>
+          <h4 class="quest-title" id="quest-title">เตรียมรับมือน้ำท่วม</h4>
+          <p class="quest-desc" id="quest-desc">รวบรวมสิ่งของจำเป็นเร่งด่วน 3 ชิ้นแรก</p>
+        </div>
+        <div class="quest-objectives-list" id="quest-objectives-list">
+          <!-- Populated dynamically -->
+        </div>
+        <div class="quest-reward-hint" id="quest-reward-hint">
+          <span>🎁 รางวัล:</span> <strong>⚡ Stamina Boost + วิ่งเร็วขึ้นถาวร</strong>
+        </div>
+      </div>
+
+      <!-- SPRINT / STAMINA GAUGE HUD -->
+      <div class="glass-card hud-stamina-card" id="hud-stamina-card">
+        <div class="stamina-header">
+          <span class="stamina-label">⚡ SPEED BOOST [E]</span>
+          <span class="stamina-pct" id="stamina-pct">100%</span>
+        </div>
+        <div class="stamina-track">
+          <div class="stamina-fill" id="stamina-bar-fill"></div>
+        </div>
+      </div>
+
+      <!-- Item Checklist Drawer (Expandable on hover or click) -->
+      <div id="items-checklist-panel" class="glass-card checklist-panel">
+        <div class="checklist-panel-title">
+          <span>📋 รายการสิ่งของสำคัญ (10 รายการ)</span>
+          <span id="checklist-counter">0 / 10</span>
+        </div>
+        <div class="checklist-grid" id="checklist-grid">
+          <!-- Populated dynamically with the 10 items -->
+        </div>
+      </div>
+
+      <!-- Floating Notification Toast -->
+      <div id="item-collected-toast" class="item-toast">
+        <div class="toast-sparkle">✨</div>
+        <div class="toast-body">
+          <div class="toast-title">ITEM COLLECTED!</div>
+          <div id="toast-item-name" class="toast-name">โทรศัพท์</div>
+        </div>
+      </div>
+
+      <!-- QUEST COMPLETE BANNER TOAST -->
+      <div id="quest-complete-toast" class="quest-toast">
+        <div class="quest-toast-glow"></div>
+        <div class="quest-toast-icon">🏆✨</div>
+        <div class="quest-toast-content">
+          <div class="quest-toast-badge">QUEST COMPLETED! (สำเร็จภารกิจ)</div>
+          <div class="quest-toast-title" id="quest-complete-title">ภารกิจที่ 1: เตรียมรับมือน้ำท่วม</div>
+          <div class="quest-toast-reward" id="quest-complete-reward">ได้รับ: ⚡ พลังวิ่งเร็วขึ้น + โบนัสเวลา +15s!</div>
+        </div>
+      </div>
+
+      <!-- Bottom Interaction Tooltip -->
+      <div id="interact-tooltip" class="interact-box">
+        <div class="interact-key-badge">[E] RUN / INTERACT</div>
+        <span id="interact-text">กด [E] ค้างเพื่อวิ่งเร็ว / เก็บของ</span>
+      </div>
+
+      <!-- Bottom Touch Controls (for mobile/tablet or mouse interaction) -->
+      <div class="hud-bottom-bar" id="touch-controls-bar">
+        <div class="touch-dpad">
+          <button class="t-btn t-up" id="t-up" aria-label="เดินขึ้น">▲</button>
+          <div class="t-mid-row">
+            <button class="t-btn t-left" id="t-left" aria-label="เดินซ้าย">◀</button>
+            <button class="t-btn t-down" id="t-down" aria-label="เดินลง">▼</button>
+            <button class="t-btn t-right" id="t-right" aria-label="เดินขวา">▶</button>
+          </div>
+        </div>
+        <div class="touch-actions">
+          <button class="touch-interact-btn" id="t-interact" title="Hold E to Sprint / Pick up item">
+            <span class="t-key">⚡ E</span>
+            <span>SPRINT</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 6. PAUSE MODAL -->
+    <div id="pause-modal" class="modal-overlay">
+      <div class="glass-card modal-card" style="max-width: 420px; text-align: center;">
+        <h2 class="modal-title" style="justify-content: center; margin-bottom: 24px;">
+          <span>⏸️</span> GAME PAUSED
+        </h2>
+        <div class="menu-buttons">
+          <button id="btn-resume" class="btn-menu btn-primary">
+            <span>▶</span> <strong>RESUME</strong> (เล่นต่อ)
+          </button>
+          <button id="btn-pause-settings" class="btn-menu">
+            <span>⚙️</span> <strong>SETTINGS</strong> (การตั้งค่า)
+          </button>
+          <button id="btn-pause-guide" class="btn-menu">
+            <span>📖</span> <strong>HOW TO PLAY</strong> (วิธีเล่น)
+          </button>
+          <button id="btn-restart" class="btn-menu">
+            <span>🔄</span> <strong>RESTART</strong> (เริ่มเล่นใหม่)
+          </button>
+          <button id="btn-quit-to-menu" class="btn-menu" style="color: #f87171; border-color: rgba(239, 68, 68, 0.3);">
+            <span>🚪</span> <strong>MAIN MENU</strong> (เมนูหลัก)
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 7. GAME OVER MODAL -->
+    <div id="game-over-modal" class="modal-overlay">
+      <div class="glass-card modal-card result-card gameover-border">
+        <div class="result-icon-box danger-icon">🌊💀</div>
+        <h2 class="result-title danger-text">GAME OVER</h2>
+        <p class="result-subtitle">THE WATER HAS TAKEN OVER THE HOUSE</p>
+        <p id="game-over-detail" class="result-reason">น้ำท่วมบ้านจนมิดหัว ไม่สามารถเอาชีวิตรอดได้!</p>
+
+        <div class="result-stats-grid">
+          <div class="stat-box">
+            <span class="stat-label">TIME SURVIVED</span>
+            <span id="stat-go-time" class="stat-value">01:45</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-label">ITEMS COLLECTED</span>
+            <span id="stat-go-items" class="stat-value">4 / 10</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-label">WATER LEVEL</span>
+            <span id="stat-go-water" class="stat-value">100%</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-label">ROOMS EXPLORED</span>
+            <span id="stat-go-rooms" class="stat-value">5 / 7</span>
+          </div>
+        </div>
+
+        <div class="menu-buttons" style="margin-top: 24px;">
+          <button id="btn-retry" class="btn-menu btn-primary">
+            <span>🔄</span> <strong>RETRY</strong> (ลองใหม่อีกครั้ง)
+          </button>
+          <button id="btn-gameover-menu" class="btn-menu">
+            <span>🏠</span> <strong>MAIN MENU</strong> (เมนูหลัก)
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 8. VICTORY / ESCAPE MODAL -->
+    <div id="victory-modal" class="modal-overlay">
+      <div class="glass-card modal-card result-card victory-border">
+        <div class="result-icon-box victory-icon">🚁🏆</div>
+        <h2 class="result-title victory-text">YOU ESCAPED!</h2>
+        <p class="result-subtitle">You survived the flood.</p>
+        <p class="result-reason">คุณรอดชีวิตจากอุทกภัยและกู้สิ่งของจำเป็นได้ทันเวลาอย่างปลอดภัย!</p>
+
+        <div class="result-stats-grid">
+          <div class="stat-box">
+            <span class="stat-label">ITEMS COLLECTED</span>
+            <span id="stat-vic-items" class="stat-value">10 / 10</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-label">TIME REMAINING</span>
+            <span id="stat-vic-time" class="stat-value">01:15</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-label">ROOMS EXPLORED</span>
+            <span id="stat-vic-rooms" class="stat-value">7 / 7</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-label">SURVIVAL RANK</span>
+            <span id="stat-vic-rank" class="stat-value rank-gold">RANK S</span>
+          </div>
+        </div>
+
+        <div class="menu-buttons" style="margin-top: 24px;">
+          <button id="btn-play-again" class="btn-menu btn-primary">
+            <span>🎉</span> <strong>PLAY AGAIN</strong> (เล่นอีกครั้ง)
+          </button>
+          <button id="btn-victory-menu" class="btn-menu">
+            <span>🏠</span> <strong>MAIN MENU</strong> (เมนูหลัก)
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 9. STAGE CLEAR MODAL -->
+    <div id="stage-clear-modal" class="modal-overlay">
+      <div class="glass-card modal-card result-card stageclear-border">
+        <div class="result-icon-box" style="font-size: 44px;">🌟🚁✨</div>
+        <div class="stage-clear-badge" id="sc-stage-badge">STAGE 1 COMPLETED!</div>
+        <h2 class="result-title" id="sc-title" style="color: #38bdf8; font-size: 28px;">ผ่านด่านสำเร็จ!</h2>
+        <div class="stage-stars-row" id="sc-stars">
+          ⭐⭐⭐
+        </div>
+        <p class="result-reason" id="sc-desc">คุณสามารถกู้ภัยสิ่งของจำเป็นและหนีขึ้นดาดฟ้าได้ทันเวลา</p>
+
+        <div class="result-stats-grid">
+          <div class="stat-box">
+            <span class="stat-label">ITEMS COLLECTED</span>
+            <span id="sc-stat-items" class="stat-value">6 / 6</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-label">TIME REMAINING</span>
+            <span id="sc-stat-time" class="stat-value">01:45</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-label">STAGE SCORE</span>
+            <span id="sc-stat-score" class="stat-value" style="color: #facc15;">2,450</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-label">NEXT STAGE</span>
+            <span id="sc-stat-next" class="stat-value" style="color: #a855f7; font-size: 16px;">STAGE 2</span>
+          </div>
+        </div>
+
+        <div class="menu-buttons" style="margin-top: 22px;">
+          <button id="btn-next-stage" class="btn-menu btn-primary" style="background: linear-gradient(135deg, #7c3aed 0%, #06b6d4 100%); border-color: #c084fc;">
+            <span>⏩</span> <strong>NEXT STAGE</strong> (เล่นด่านถัดไป)
+          </button>
+          <button id="btn-stageclear-stageselect" class="btn-menu">
+            <span>🗺️</span> <strong>STAGE SELECT</strong> (เลือกด่าน)
+          </button>
+          <button id="btn-stageclear-menu" class="btn-menu">
+            <span>🏠</span> <strong>MAIN MENU</strong> (เมนูหลัก)
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
